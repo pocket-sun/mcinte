@@ -10,7 +10,7 @@ def continue_run(filename, N_ndim_nwalkers, continue_num , thread = None):
     nwalkers = N_ndim_nwalkers[2]
     # parallelization
     with Pool(thread) as pool:
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, pos.inte_region,
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, pos.region,
                                         pool=pool, # parallelization
                                         args=[N], # inte_region(x, args=[...])
                                         backend=reader) # backup data on the fly
