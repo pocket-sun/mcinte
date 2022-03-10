@@ -7,14 +7,28 @@ from itertools import product
 from . import inte_region as pos
 
 # return sorted np.array (along first column)
-def sort_kpor(arr): # keep order
-    rst = np.zeros(arr.shape)
-    sort_index_of_first_col = np.argsort(arr,axis=0)[:,0]
-    row_new = 0
-    for row_old in sort_index_of_first_col:
-        rst[row_new, :] = arr[row_old, :]
-        row_new += 1
-    return rst # np.array is ptr not the whole array!
+#def sort_kpor(arr): # keep order
+#    rst = np.zeros(arr.shape)
+#    sort_index_of_first_col = np.argsort(arr,axis=0)[:,0]
+#    row_new = 0
+#    for row_old in sort_index_of_first_col:
+#        rst[row_new, :] = arr[row_old, :]
+#        row_new += 1
+#    return rst # np.array is ptr not the whole array!
+
+# return point list inside the square
+cmp = lambda x: x[0]
+def sort_and_find(lst, cor, r, ndim):
+    for d in range(1, ndim-1):
+        tmp = np.array(sorted(lst, key = cmp))
+        low_ind = np.searchsorted(tmp[:,0], cor[d]-r)
+        high_ind = np.searchsorted(tmp[:,0], cor[d]+r)
+        lst = np.delete(tmp[low_ind:high_ind,:],0,axis=1)
+    tmp = np.array(sorted(lst, key = cmp))
+    low_ind = np.searchsorted(tmp[:,0], cor[ndim-1]-r)
+    high_ind = np.searchsorted(tmp[:,0], cor[ndim-1]+r)
+    return high_ind-low_ind
+
 
 # is all points of the square inside inte_region?
 def is_in(x, sign, a):
@@ -39,7 +53,7 @@ def not_too_close(seed_set,cor0,direc,r):
 
 que = Queue()
 # multiprocess
-def fill_square(nnum,cnum,rst,rst_1st_col,a,r,ndim,sign,direc):
+def fill_square(nnum,cnum,rst,a,r,ndim,sign,direc):
     cnt_list = np.array([0, 0]) # pcnt, sqrcnt
     np.random.seed(time.time_ns() % 2**18)
     trigger = False
@@ -60,15 +74,20 @@ def fill_square(nnum,cnum,rst,rst_1st_col,a,r,ndim,sign,direc):
             direc *= -1
             trigger = True
         cnt_list[1] += 1
-        lower = np.searchsorted(rst_1st_col, cor[0]-r)
-        upper = np.searchsorted(rst_1st_col, cor[0]+r)
-        for i in range(lower, upper):
-            dcnt = 0
-            for d in range(1, ndim):
-                if rst[i,d] >= cor[d]-r and rst[i,d] <= cor[d]+r:
-                    dcnt += 1 # [1, ndim) => ndim-1 times
-            if dcnt == ndim-1:
-               cnt_list[0] += 1
+        tmp = rst;
+        low_ind = np.searchsorted(rst[:,0], cor[0]-r)
+        high_ind = np.searchsorted(rst[:,0], cor[0]+r)
+        lst = np.delete(tmp[low_ind:high_ind,:],0,axis=1)
+        cnt_list[0] += sort_and_find(lst, cor, r, ndim)
+#        lower = np.searchsorted(rst_1st_col, cor[0]-r)
+#        upper = np.searchsorted(rst_1st_col, cor[0]+r)
+#        for i in range(lower, upper):
+#            dcnt = 0
+#            for d in range(1, ndim):
+#                if rst[i,d] >= cor[d]-r and rst[i,d] <= cor[d]+r:
+#                    dcnt += 1 # [1, ndim) => ndim-1 times
+#            if dcnt == ndim-1:
+#               cnt_list[0] += 1
     que.put(cnt_list)
     return
 
@@ -84,8 +103,7 @@ def get_vol(sampler, N_ndim_nwalkers, rate = 0.1, r = -1, nthread = None):
     # preparation
     cor_t = int(np.ceil(sampler.get_autocorr_time().max()))
     rst = sampler.get_chain(flat=True, discard=3*cor_t)#, thin=int(0.1*cor_t))
-    rst = sort_kpor(rst)
-    rst_1st_col = rst[:,0]
+    rst = np.array(sorted(rst, key = cmp))
     ndim = rst.shape[1]
     nnum = rst.shape[0]
     a = N_ndim_nwalkers[0]
@@ -118,7 +136,7 @@ def get_vol(sampler, N_ndim_nwalkers, rate = 0.1, r = -1, nthread = None):
         p = []
         for k in range(nthread):
             direc = 2 * r * (ndim) ** (1/2) * sample_spherical(ndim)
-            p = p + [Process(target=fill_square, args=(nnum,cnum_batch,rst,rst_1st_col,a,r,ndim,
+            p = p + [Process(target=fill_square, args=(nnum,cnum_batch,rst,a,r,ndim,
                                                        sign,direc))]
             p[k].start()
         for k in range(nthread):
