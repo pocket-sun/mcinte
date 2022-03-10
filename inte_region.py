@@ -9,7 +9,7 @@ import numpy as np
     return 1, otherwise return -1e150
 """
 
-def region(x,a): # a is extra arguments passed by N_ndim_nwalkers[0]
+def inte_region(x,a): # a is extra arguments passed by N_ndim_nwalkers[0]
 
     if x[0] < 0 or x[1] < 0 or x[2] < 0:
         return -1.e150
