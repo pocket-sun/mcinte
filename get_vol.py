@@ -20,10 +20,14 @@ from . import inte_region as pos
 cmp = lambda x: x[0]
 def sort_and_find(lst, cor, r, ndim):
     for d in range(1, ndim-1):
+        if lst.shape[0] == 0:
+            return 0.
         tmp = np.array(sorted(lst, key = cmp))
         low_ind = np.searchsorted(tmp[:,0], cor[d]-r)
         high_ind = np.searchsorted(tmp[:,0], cor[d]+r)
         lst = np.delete(tmp[low_ind:high_ind,:],0,axis=1)
+    if lst.shape[0] == 0:
+        return 0.
     tmp = np.array(sorted(lst, key = cmp))
     low_ind = np.searchsorted(tmp[:,0], cor[ndim-1]-r)
     high_ind = np.searchsorted(tmp[:,0], cor[ndim-1]+r)
