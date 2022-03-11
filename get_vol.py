@@ -42,9 +42,9 @@ def is_in(x, sign, a):
     return toggle
 
 # is two seed points too close?
-def not_too_close(seed_set,cor0,direc,r):
+def not_too_close(seed_set,cor0,direc,r,ndim):
     toggle = True
-    cri_distance2 = 12*r**2
+    cri_distance2 = 4*ndim*r**2
     for seed in seed_set:
         b_m_a = seed - cor0
         direc2 = np.dot(direc, direc)
@@ -69,7 +69,7 @@ def fill_square(nnum,cnum,rst,a,r,ndim,sign,direc):
             cor += direc
         elif trigger: 
             cor0 = rst[np.random.randint(nnum),:]
-            while (not is_in(cor0,sign,a)) or (not not_too_close(seed_set,cor0,direc,r)):
+            while (not is_in(cor0,sign,a)) or (not not_too_close(seed_set,cor0,direc,r,ndim)):
                 cor0 = rst[np.random.randint(nnum),:]
             cor = cor0
             seed_set.append(cor0)
@@ -132,7 +132,7 @@ def get_vol(sampler, N_ndim_nwalkers, rate = 0.1, r = -1, nthread = None):
     # fill with square
     if nthread == None:
         nthread = cpu_count()
-    max_batch = 5
+    max_batch = 15
     cnum_batch = cnum//max_batch
     pcnt_sqrcnt = np.array([0, 0])
     np.random.seed(time.time_ns() % 2**16)
