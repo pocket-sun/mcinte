@@ -17,7 +17,7 @@ scale = 20
 # x[ndim-1] = sin[phi0]...sin[phi_{ndim-2}]cos[phi_{ndim-1}]
 # x[ndim]   = sin[phi0]...sin[phi_{ndim-2}]sin[phi_{ndim-1}]
 # phi0~phi_{ndim-2} in [0,pi], phi_{ndim-1} in [0, 2pi]
-def sample_spherical(phi, ndim):
+def uni_spherical(phi, ndim):
     if ndim != 2:
         if len(phi) != ndim-1:
             print("phi and ndim mismatch") 
@@ -34,20 +34,26 @@ def sample_spherical(phi, ndim):
         print("low dimension")
         return -1.
 
+def sample_spherical(npoints, ndim):
+    vec = np.random.randn(npoints, ndim)
+    vec /= np.linalg.norm(vec, axis=0)
+    return vec
 
 # instantiate hull
 def find_and_construct_hull(center, test_direc, rmax):
     global hull_ptrs, hull_points
-    rc = (rmax / scale) * 1e-7
-    rmin = 0 ; hull_ptrs = [] ; r = (rmax+rmin)/2
+    r0max = rmax
+    rc = (rmax / scale) * 1e-12
+    hull_ptrs = []
     for ray in test_direc:
-        while (rmax - rmin) > rc:
+        rmin = 0 ; rmax = r0max ; r = (rmax+rmin)/2
+        while np.abs(rmax - rmin) > rc:
             if region(center + ray * r, a) < 0: # outside
                 rmax = r
             else: # inside
                 rmin = r
             r = (rmin + rmax)/2
-        hull_ptrs = hull_ptrs + [center + ray*r]
+        hull_ptrs = hull_ptrs + [center + ray * r]
     hull_points = hull_ptrs
     if not isinstance(hull_ptrs,Delaunay):
         hull_ptrs = Delaunay(hull_ptrs)
@@ -89,7 +95,7 @@ def convex_vol(sampler, arguments, angle_num=0, nthread=None):
 
     # test direction
     if angle_num == 0:
-        angle_num = 2**(ndim+1)
+        angle_num = 2**(ndim)
     theta = np.linspace(0, np.pi, angle_num+2) ; theta = theta[1:-1]
     phi = np.linspace(0, 2*np.pi, angle_num+1) ; phi = phi[:-1]
     if ndim == 2:
@@ -103,7 +109,7 @@ def convex_vol(sampler, arguments, angle_num=0, nthread=None):
                 angles = angles + [tmp]
     test_direc = []
     for ang in angles:
-        test_direc = test_direc + [sample_spherical(ang, ndim)]
+        test_direc = test_direc + [uni_spherical(ang, ndim)]
     test_direc = np.concatenate(test_direc, axis=0)
     test_direc[np.abs(test_direc)<1e-10] = 0
 
@@ -115,8 +121,8 @@ def convex_vol(sampler, arguments, angle_num=0, nthread=None):
         nthread = cpu_count()
     nnum_batch = nnum//nthread
     p = [] ; cnt = 0
+    print("multiprocessing...")
     for k in range(nthread-1):
-        print("a",k)
         p = p + [Process( target=count_in_polytope,
                           args=(k*nnum_batch, (k+1)*nnum_batch) ) ]
         p[k].start()
