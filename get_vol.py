@@ -6,6 +6,9 @@ from multiprocessing import Process, Queue
 from itertools import product 
 from . import inte_region as pos
 
+# global variables
+global ndim, nnum, test_direc, ntdirec, rst, rmax # in get_vol
+global existed_balls = [] # store tuple (cor, r), cor is ptr
 
 # return point list inside the square
 cmp = lambda x: x[0]
@@ -33,25 +36,50 @@ def is_in(x, sign, a):
     #print("b",x)
     return toggle
 
-# is two seed points too close?
-def not_too_close(seed_set,cor0,direc,r,ndim):
-    toggle = True
-    cri_distance2 = 4*ndim*r**2
-    for seed in seed_set:
-        b_m_a = seed - cor0
-        direc2 = np.dot(direc, direc)
-        l = b_m_a - direc * np.dot(b_m_a,direc)/direc2
-        toggle = toggle and (np.dot(l,l) > cri_distance2)
-        if not toggle:
-            return toggle
-    return toggle
+# 
+def expand_ball(cor):
+    rupper = rmax
+    rlower = 0
+    # if r too large:
+    #   rupper = r
+    # else
+    #   rlower = r
+    # r = (rupper+rlower)/2
+    # till rupper-rlower<critical_diff
+    
         
 
 que = Queue()
 # multiprocess
-def fill_square(nnum,cnum,rst,a,r,ndim,sign,direc):
+def fill_ball(rst, rmax, seed = None):
+
+    global existed_balls
+
+    if seed == None:
+        seed = rst[np.random.randint(nnum),:]
+    expand_ball(seed, rmax)
+    
+    # create a ball with [seed], expand utill it touches the boundary
+
+    # get a random [cor] inside rst, [rst] is points set excluding existed balls
+
+    # construct a ball centered at cor, with given small radius [rmin]
+
+    # expand the ball with bisec method
+
+    # if the ball touches one of [existed_balls], push away the ball along radical direction
+
+    # the ball must touches only one of [existed_balls], shrink the radius if not
+
+    # if the ball touches the boundary and does not touch any one of [existed_balls], 
+    # push away the ball along radical direction
+
+    # if the ball touches both boundary and [existed_balls], shrink
+
+    # continue untill [radius_diff] < [critical_diff]
+
+    # continue untill required points [cnum] are obtained
     cnt_list = np.array([0, 0]) # pcnt, sqrcnt
-    np.random.seed(time.time_ns() % 2**10)
     trigger = False
     cor0 = rst[np.random.randint(nnum),:]
     cor = cor0.copy()
@@ -83,43 +111,36 @@ def fill_square(nnum,cnum,rst,a,r,ndim,sign,direc):
     return
 
 # random direction (not from me and it is not uniform in sphere)
-def sample_spherical(ndim):
-    vec = np.random.randn(ndim)
+def sample_spherical(npoints, ndim):
+    vec = np.random.randn(npoints, ndim)
     vec /= np.linalg.norm(vec, axis=0)
     return vec
 
 # return the volume descripted by inte_region
-# r>0 size=r; r<0 size=-r*min_wid
-def get_ldvol(sampler, a, rate=0.1, r=0, max_batch=20, nthread=None):
+def get_vol(sampler, a, rate=0.1, max_batch=20, nthread=None):
+
+    # global def here
+    global ndim, nnum, test_direc, ntdirec, rst, rmax
 
     # preparation
     cor_t = int(np.ceil(sampler.get_autocorr_time().max()))
     rst = sampler.get_chain(flat=True, discard=3*cor_t)#, thin=int(0.1*cor_t))
-    rst = np.array(sorted(rst, key = cmp))
     ndim = rst.shape[1]
     nnum = rst.shape[0]
     cnum = int(nnum * rate) # critical number
-    if not 2 <= ndim <= 3:
-        print("only ndim = 2 or 3 are tested!")
+    np.random.seed(time.time_ns() % 2**10)
+    if ndim < 2:
+        print("too low dimention")
         return -1
+    for d in range(ndim):
+        dim_width[d] = rst[:,d].max() - rst[:,d].min()
+    rmax = 10*dim_width.max()
 
-    # square size
-    if r <= 0:
-        dim_width = np.empty(ndim)
-        for d in range(ndim):
-            dim_width[d] = rst[:,d].max() - rst[:,d].min()
-        min_wid = dim_width.min()
-        if r == 0:
-            r = 5e-3 * min_wid
-        else:
-            r = (-r) * min_wid
-    square_vol = (2*r)**ndim
-    sign_raw = product([r,-r],repeat=ndim)
-    sign = []
-    for i in sign_raw:
-        sign = sign + [np.array(i)]
+    # test direction
+    test_direc = sample_spherical(2**(ndim+1), ndim) # [npoints, ndim]
+    ntdirec = test_direc.shape[0]
 
-    # fill with square
+    # fill with ball
     if nthread == None:
         nthread = cpu_count()
     cnum_batch = cnum//max_batch
