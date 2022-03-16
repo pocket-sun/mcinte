@@ -24,8 +24,8 @@ def uni_spherical(phi, ndim):
             return -1.  
         x = [np.cos(phi[0])]
         for i in range(1, ndim-1):
-            x = x + [np.prod(np.sin(phi[0:i])) * np.cos(phi[i])]
-        x = x + [np.prod(np.sin(phi[0:i])) * np.sin(phi[i])]
+            x.append(np.prod(np.sin(phi[0:i])) * np.cos(phi[i]))
+        x.append(np.prod(np.sin(phi[0:i])) * np.sin(phi[i]))
         return np.array([x])
     elif ndim == 2:
         x = [np.cos(phi), np.sin(phi)]
@@ -94,6 +94,7 @@ def convex_vol(sampler, arguments, angle_num=0, nthread=None):
         dim_center = rst[np.random.randint(nnum),:]
 
     # test direction
+    print("generating angles...")
     if angle_num == 0:
         angle_num = 2**(ndim)
     theta = np.linspace(0, np.pi, angle_num+2) ; theta = theta[1:-1]
@@ -108,6 +109,7 @@ def convex_vol(sampler, arguments, angle_num=0, nthread=None):
                 tmp = list(i) ; tmp.append(j)
                 angles = angles + [tmp]
     test_direc = []
+    print("generating directions...")
     for ang in angles:
         test_direc = test_direc + [uni_spherical(ang, ndim)]
     test_direc = np.concatenate(test_direc, axis=0)
