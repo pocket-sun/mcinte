@@ -90,6 +90,7 @@ def convex_vol(sampler, arguments, angle_num=0, nthread=None):
         dim_width = np.max([dim_width, tmax - tmin])
         dim_center = dim_center + [(tmax+tmin)/2]
     rmax = scale * dim_width
+    dim_center = np.array(dim_center)
     if region(dim_center, a) < 0:
         dim_center = rst[np.random.randint(nnum),:]
 
