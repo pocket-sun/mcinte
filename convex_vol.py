@@ -6,6 +6,7 @@ from multiprocessing import Process, Queue
 from .inte_region import region
 from scipy.spatial import Delaunay
 from scipy.spatial import ConvexHull
+from mcinte.inte_region import argument
 
 # global variables
 global ndim, nnum, rst, a
@@ -69,10 +70,10 @@ def count_in_polytope(low, high):
 
 # return the volume descripted by inte_region
 # r>0 size=r; r<0 size=-r*min_wid
-def convex_vol(sampler, arguments, angle_num=0, nthread=None):
+def convex_vol(sampler, angle_num=0, nthread=None):
 
     global ndim, nnum, rst, a
-    a = arguments
+    a = argument
 
     # preparation
     cor_t = int(np.ceil(sampler.get_autocorr_time().max()))
@@ -139,6 +140,5 @@ def convex_vol(sampler, arguments, angle_num=0, nthread=None):
 
     polytope_vol = ConvexHull(hull_points).volume
 
-    print("poly_vol=%E\tcnt=%d" % (polytope_vol, cnt))
     vol = polytope_vol * nnum / cnt
     return vol

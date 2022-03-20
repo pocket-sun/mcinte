@@ -13,7 +13,11 @@ def para_sum(rst, low, high, fcn):
     return
 
 # integration of fcn over inte_region, normalized by 1/V, V = get_vol
-def get_inte(sampler, fcn, nthread=None):
+def get_inte(sampler, fcn, norm=False, nthread=None):
+    """calculate integration of fcn under vol descripted by inte_region
+
+    norm = True, 1/V normalization is used, otherwise nonorm = (True, arguments)
+    """
 
     cor_t = int(np.ceil(sampler.get_autocorr_time().max()))
     rst = sampler.get_chain(flat=True, discard=3*cor_t)#, thin=int(0.1*cor_t))
@@ -38,6 +42,10 @@ def get_inte(sampler, fcn, nthread=None):
         p[k].join()
     while not que.empty():
         inte += que.get()
-
-    print("cnt=%d" % nnum)
+    
+    if not norm:
+        from mcinte.convex_vol import convex_vol
+        from mcinte.inte_region import argument
+        vol = convex_vol(sampler)
+        return vol * inte/nnum
     return inte/nnum

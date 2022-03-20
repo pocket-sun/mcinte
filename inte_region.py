@@ -10,8 +10,9 @@ EXCLUDE = -1e150
     points inside integration region
     return 1, otherwise return EXCLUDE
 """
+argument = 1.
 
-def region(x,a): # a is extra arguments passed by N_ndim_nwalkers[0]
+def region(x,a=argument): # a is extra arguments passed by N_ndim_nwalkers[0]
 
 #    if x[0] < 0 or x[1] < 0 or x[2] < 0:
 #        return -1.e150
@@ -35,7 +36,13 @@ def region(x,a): # a is extra arguments passed by N_ndim_nwalkers[0]
 #    else:
 #        return EXCLUDE
 
-    if np.sum(x**2) < a**2 and -a/2 < x[0] < a/2:
+#    if np.sum(x**2) < a**2 and -a/2 < x[0] < a/2:
+#        return 1.
+#    else:
+#        return EXCLUDE
+
+    if x[0] > 0 and x[1] > 0 and x[2] > 0 and \
+        np.sum(x) < a:
         return 1.
     else:
         return EXCLUDE

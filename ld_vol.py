@@ -86,12 +86,13 @@ def sample_spherical(ndim):
 
 # return the volume descripted by inte_region
 # r>0 size=r; r<0 size=-r*min_wid
-def ld_vol(sampler, a, rate=0.1, r=0, max_batch=20, nthread=None):
+def ld_vol(sampler, rate=0.1, r=0, max_batch=20, nthread=None):
 
     # preparation
     cor_t = int(np.ceil(sampler.get_autocorr_time().max()))
     rst = sampler.get_chain(flat=True, discard=3*cor_t)#, thin=int(0.1*cor_t))
     rst = np.array(sorted(rst, key = cmp))
+    a = pos.argument
     ndim = rst.shape[1]
     nnum = rst.shape[0]
     cnum = int(nnum * rate) # critical number
@@ -136,6 +137,6 @@ def ld_vol(sampler, a, rate=0.1, r=0, max_batch=20, nthread=None):
 #        print("pcnt=%-8d, sqrcnt=%-8d" % (pcnt_sqrcnt[0],pcnt_sqrcnt[1]))
 #        print("density=", pcnt_sqrcnt[1]/pcnt_sqrcnt[0])
 
-    print("sqr_vol=%E\tsqr_num=%d\tcnt=%d" % (square_vol, pcnt_sqrcnt[1],pcnt_sqrcnt[0]))
+#    print("sqr_vol=%E\tsqr_num=%d\tcnt=%d" % (square_vol, pcnt_sqrcnt[1],pcnt_sqrcnt[0]))
     vol = square_vol * pcnt_sqrcnt[1] * nnum / pcnt_sqrcnt[0]
     return vol
