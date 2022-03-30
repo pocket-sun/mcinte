@@ -13,6 +13,7 @@ global ndim, nnum, rst, a
 global hull_ptrs, hull_points
 scale = 20
 
+aaaaa
 
 # x[0] = cos[phi0], x[1] = sin[phi0]cos[phi1], ... ,
 # x[ndim-1] = sin[phi0]...sin[phi_{ndim-2}]cos[phi_{ndim-1}]
