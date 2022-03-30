@@ -29,20 +29,20 @@ def region(x,a=argument): # a is extra arguments passed by N_ndim_nwalkers[0]
 #    else:
 #        return EXCLUDE
 
-    if x[0]**2+x[1]**2+x[2]**2+x[3]**2+x[4]**2<=a**2:
-        return 1.
-    else:
-        return EXCLUDE
+#    if x[0]**2+x[1]**2+x[2]**2+x[3]**2+x[4]**2<=a**2:
+#        return 1.
+#    else:
+#        return EXCLUDE
 
 #    if x[0]**2+x[1]**2+x[2]**2<=a**2:
 #        return 1.
 #    else:
 #        return EXCLUDE
 
-#    if x[0]**2+x[1]**2<=a**2:
-#        return 1.
-#    else:
-#        return EXCLUDE
+    if x[0]**2+x[1]**2<=a**2:
+        return 1.
+    else:
+        return EXCLUDE
 
 #    if np.sum(x**2) < a**2 and -a/2 < x[0] < a/2:
 #        return 1.
@@ -55,10 +55,10 @@ def region(x,a=argument): # a is extra arguments passed by N_ndim_nwalkers[0]
 #    else:
 #        return EXCLUDE
     
-    if np.sum(x**2) < a**2 and x[0]**2 + x[1]**2 < a*x[0]:
-        return 1.
-    else:
-        return EXCLUDE
+#    if np.sum(x**2) < a**2 and x[0]**2 + x[1]**2 < a*x[0]:
+#        return 1.
+#    else:
+#        return EXCLUDE
 
 ## --- end --- ##
 
