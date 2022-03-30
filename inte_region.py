@@ -11,10 +11,10 @@ EXCLUDE = -1e150
     return 1, otherwise return EXCLUDE
     argument must be changed below, not in region
 """
-argument = 1.
-#a = 1.5 # hypersphere and round
+a = 1.5 # hypersphere and round
 #a = 2 # sphere sliced_round
 #a = 1 # drill plane vol
+argument = a
 
 def region(x,a=argument): # a is extra arguments passed by N_ndim_nwalkers[0]
     """mathematical description of integral region
@@ -29,10 +29,10 @@ def region(x,a=argument): # a is extra arguments passed by N_ndim_nwalkers[0]
 #    else:
 #        return EXCLUDE
 
-#    if x[0]**2+x[1]**2+x[2]**2+x[3]**2+x[4]**2<=a**2:
-#        return 1.
-#    else:
-#        return EXCLUDE
+    if x[0]**2+x[1]**2+x[2]**2+x[3]**2+x[4]**2<=a**2:
+        return 1.
+    else:
+        return EXCLUDE
 
 #    if x[0]**2+x[1]**2+x[2]**2<=a**2:
 #        return 1.
@@ -55,10 +55,10 @@ def region(x,a=argument): # a is extra arguments passed by N_ndim_nwalkers[0]
 #    else:
 #        return EXCLUDE
     
-    if np.sum(x**2) < a**2 and x[0]**2 + x[1]**2 < a*x[0]:
-        return 1.
-    else:
-        return EXCLUDE
+#    if np.sum(x**2) < a**2 and x[0]**2 + x[1]**2 < a*x[0]:
+#        return 1.
+#    else:
+#        return EXCLUDE
 
 ## --- end --- ##
 

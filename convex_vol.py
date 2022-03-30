@@ -11,8 +11,8 @@ from mcinte.inte_region import argument
 # global variables
 global ndim, nnum, rst, a
 global hull_ptrs, hull_points
+global stheta, ctheta, sphi, cphi
 scale = 20
-
 
 # x[0] = cos[phi0], x[1] = sin[phi0]cos[phi1], ... ,
 # x[ndim-1] = sin[phi0]...sin[phi_{ndim-2}]cos[phi_{ndim-1}]
@@ -23,13 +23,18 @@ def uni_spherical(phi, ndim):
         if len(phi) != ndim-1:
             print("phi and ndim mismatch") 
             return -1.  
-        x = [np.cos(phi[0])]
-        for i in range(1, ndim-1):
-            x.append(np.prod(np.sin(phi[0:i])) * np.cos(phi[i]))
-        x.append(np.prod(np.sin(phi[0:i])) * np.sin(phi[i]))
+        x = [ctheta[phi[0]]]
+        tmp = 1.
+        for i in range(0, ndim-3):
+            tmp *= stheta[phi[i]]
+            x.append(tmp * ctheta[phi[i+1]])
+        i += 1 # i = ndim-3
+        tmp *= stheta[phi[i]]
+        x.append(tmp * cphi[phi[i+1]])
+        x.append(tmp * sphi[phi[i+1]])
         return np.array([x])
     elif ndim == 2:
-        x = [np.cos(phi), np.sin(phi)]
+        x = [cphi[phi], sphi[phi]]
         return np.array([x])
     else:
         print("low dimension")
@@ -73,6 +78,7 @@ def count_in_polytope(low, high):
 def convex_vol(sampler, angle_num=0, nthread=None):
 
     global ndim, nnum, rst, a
+    global cphi, sphi, ctheta, stheta
     a = argument
 
     # preparation
@@ -101,13 +107,15 @@ def convex_vol(sampler, angle_num=0, nthread=None):
         angle_num = 5
     theta = np.linspace(0, np.pi, angle_num+2) ; theta = theta[1:-1]
     phi = np.linspace(0, 2*np.pi, angle_num+1) ; phi = phi[:-1]
+    sphi = np.sin(phi) ; cphi = np.cos(phi)
+    stheta = np.sin(theta) ; ctheta = np.cos(theta)
     if ndim == 2:
-        angles = phi
+        angles = range(len(phi))
     else:
         angles = []
-        thete_iter = itertools.product(theta, repeat=ndim-2)
+        thete_iter = itertools.product(range(len(theta)), repeat=ndim-2)
         for i in thete_iter:
-            for j in phi:
+            for j in range(len(phi)):
                 tmp = list(i) ; tmp.append(j)
                 angles = angles + [tmp]
     test_direc = []
