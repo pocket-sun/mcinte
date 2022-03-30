@@ -16,7 +16,7 @@ def para_sum(rst, low, high, fcn):
 def get_inte(sampler, fcn, norm=False, nthread=None):
     """calculate integration of fcn under vol descripted by inte_region
 
-    norm = True, 1/V normalization is used, otherwise nonorm = (True, arguments)
+    norm = True, 1/V normalization is used
     """
 
     cor_t = int(np.ceil(sampler.get_autocorr_time().max()))

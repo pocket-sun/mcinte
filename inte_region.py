@@ -9,6 +9,7 @@ EXCLUDE = -1e150
 """
     points inside integration region
     return 1, otherwise return EXCLUDE
+    argument must be changed below, not in region
 """
 argument = 1.
 #a = 1.5 # hypersphere and round
@@ -16,6 +17,10 @@ argument = 1.
 #a = 1 # drill plane vol
 
 def region(x,a=argument): # a is extra arguments passed by N_ndim_nwalkers[0]
+    """mathematical description of integral region
+
+    modification of parameter a must be passed to arguments above
+    """
 
 #    if x[0] < 0 or x[1] < 0 or x[2] < 0:
 #        return -1.e150
