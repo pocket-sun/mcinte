@@ -98,7 +98,7 @@ def convex_vol(sampler, angle_num=0, nthread=None):
     # test direction
     print("generating angles...")
     if angle_num == 0:
-        angle_num = 2**(ndim)
+        angle_num = 5
     theta = np.linspace(0, np.pi, angle_num+2) ; theta = theta[1:-1]
     phi = np.linspace(0, 2*np.pi, angle_num+1) ; phi = phi[:-1]
     if ndim == 2:
